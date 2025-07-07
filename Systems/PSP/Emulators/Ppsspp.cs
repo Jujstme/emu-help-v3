@@ -27,10 +27,10 @@ internal class Ppsspp : PSPEmulator
         if (hwnd != IntPtr.Zero)
         {
             // https://www.ppsspp.org/docs/reference/process-hacks/
-            int lower = SendMessage(hwnd, 0xB118, 0, 0);
+            int lower = SendMessage(hwnd, 0xB118, 0, 2);
             if (_process.Is64Bit)
             {
-                int upper = SendMessage(hwnd, 0xB118, 0, 1);
+                int upper = SendMessage(hwnd, 0xB118, 0, 3);
                 addr_base = (IntPtr)((upper << 32) + lower);
             }
             else
@@ -43,11 +43,13 @@ internal class Ppsspp : PSPEmulator
 
             if (!_process.Read(addr_base, out IntPtr ptr))
                 return false;
+
             RamBase = ptr;
         }
 
         if (RamBase != IntPtr.Zero)
-                Log.Info($"  => RAM address found at 0x{RamBase.ToString("X")}");
+            Log.Info($"  => RAM address found at 0x{RamBase.ToString("X")}");
+
         return true;
     }
 
@@ -55,8 +57,8 @@ internal class Ppsspp : PSPEmulator
     {
         if (!process.Read(addr_base, out IntPtr ptr))
             return false;
-        RamBase = ptr;
 
+        RamBase = ptr;
         return true;
     }
 }
