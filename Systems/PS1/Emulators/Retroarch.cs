@@ -38,16 +38,16 @@ internal class Retroarch : PS1Emulator
         IntPtr ptr = _process.Is64Bit
             ? currentCore.ModuleName switch
             {
-                "mednafen_psx_hw_libretro.dll" or "mednafen_psx_libretro.dll" => _process.Scan(new MemoryScanPattern(4, "48 0F 44 05") { OnFound = addr => _process.DerefOffsets(addr + 0x4 + _process.Read<int>(addr), 0) }, baseScanAddr, 0x100),
-                "swanstation_libretro.dll" => _process.Scan(new MemoryScanPattern(3, "48 8B 05 ?? ?? ?? ?? C3") { OnFound = addr => _process.DerefOffsets(addr + 0x4 + _process.Read<int>(addr), 0) }, baseScanAddr, 0x100),
-                "pcsx_rearmed_libretro.dll" => _process.Scan(new MemoryScanPattern(3, "48 8B 05 ?? ?? ?? ?? 48 8B 00") { OnFound = addr => _process.DerefOffsets(addr + 0x4 + _process.Read<int>(addr), 0, 0) }, baseScanAddr, 0x100),
+                "mednafen_psx_hw_libretro.dll" or "mednafen_psx_libretro.dll" => _process.Scan(new ScanPattern(4, "48 0F 44 05") { OnFound = addr => _process.DerefOffsets(addr + 0x4 + _process.Read<int>(addr), 0) }, baseScanAddr, 0x100),
+                "swanstation_libretro.dll" => _process.Scan(new ScanPattern(3, "48 8B 05 ?? ?? ?? ?? C3") { OnFound = addr => _process.DerefOffsets(addr + 0x4 + _process.Read<int>(addr), 0) }, baseScanAddr, 0x100),
+                "pcsx_rearmed_libretro.dll" => _process.Scan(new ScanPattern(3, "48 8B 05 ?? ?? ?? ?? 48 8B 00") { OnFound = addr => _process.DerefOffsets(addr + 0x4 + _process.Read<int>(addr), 0, 0) }, baseScanAddr, 0x100),
                 _ => IntPtr.Zero,
             }
             : currentCore.ModuleName switch
             {
-                "mednafen_psx_hw_libretro.dll" or "mednafen_psx_libretro.dll" => _process.Scan(new MemoryScanPattern(3, "0F 44 05") { OnFound = addr => { return _process.DerefOffsets(addr, 0, 0); } }, baseScanAddr, 0x100),
-                "swanstation_libretro.dll" => _process.Scan(new MemoryScanPattern(3, "74 ?? A1") { OnFound = addr => _process.DerefOffsets(addr, 0, 0) }, baseScanAddr, 0x100),
-                "pcsx_rearmed_libretro.dll" => _process.Scan(new MemoryScanPattern(3, "0F 44 05 ?? ?? ?? ?? C3") { OnFound = addr => _process.DerefOffsets(addr, 0, 0) }, baseScanAddr, 0x100),
+                "mednafen_psx_hw_libretro.dll" or "mednafen_psx_libretro.dll" => _process.Scan(new ScanPattern(3, "0F 44 05") { OnFound = addr => { return _process.DerefOffsets(addr, 0, 0); } }, baseScanAddr, 0x100),
+                "swanstation_libretro.dll" => _process.Scan(new ScanPattern(3, "74 ?? A1") { OnFound = addr => _process.DerefOffsets(addr, 0, 0) }, baseScanAddr, 0x100),
+                "pcsx_rearmed_libretro.dll" => _process.Scan(new ScanPattern(3, "0F 44 05 ?? ?? ?? ?? C3") { OnFound = addr => _process.DerefOffsets(addr, 0, 0) }, baseScanAddr, 0x100),
                 _ => IntPtr.Zero,
             };
 

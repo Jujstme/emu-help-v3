@@ -22,7 +22,7 @@ internal class SegaClassics : GenesisEmulator
 
         if (isUsingGenesisWrapper)
         {
-            var target = new MemoryScanPattern(2, "C7 05 ?? ?? ?? ?? ?? ?? ?? ?? A3 ?? ?? ?? ?? A3") { OnFound = _process.ReadPointer };
+            var target = new ScanPattern(2, "C7 05 ?? ?? ?? ?? ?? ?? ?? ?? A3 ?? ?? ?? ?? A3") { OnFound = _process.ReadPointer };
             IntPtr ptr = _process.Scan(target, genesisWrapper);
             
             if (ptr == IntPtr.Zero)
@@ -32,7 +32,7 @@ internal class SegaClassics : GenesisEmulator
         }
         else
         {
-            MemoryScanPattern target = new MemoryScanPattern(8, "89 2D ?? ?? ?? ?? 89 0D") { OnFound = _process.ReadPointer };
+            ScanPattern target = new ScanPattern(8, "89 2D ?? ?? ?? ?? 89 0D") { OnFound = _process.ReadPointer };
             IntPtr ptr = _process.Scan(target, _process.MainModule);
 
             if (ptr == IntPtr.Zero)

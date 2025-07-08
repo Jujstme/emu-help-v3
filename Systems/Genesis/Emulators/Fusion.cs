@@ -18,7 +18,7 @@ internal class Fusion : GenesisEmulator
 
     public override bool FindRAM(ProcessMemory process)
     {
-        IntPtr ptr = process.MainModule.Scan(new MemoryScanPattern(1, "75 2F 6A 01") { OnFound = addr => addr + 0x3 + process.Read<byte>(addr) });
+        IntPtr ptr = process.MainModule.Scan(new ScanPattern(1, "75 2F 6A 01") { OnFound = addr => addr + 0x3 + process.Read<byte>(addr) });
 
         if (ptr == IntPtr.Zero)
             return false;

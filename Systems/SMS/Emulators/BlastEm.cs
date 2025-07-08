@@ -16,7 +16,7 @@ internal class BlastEm : SMSEmulator
     public override bool FindRAM(ProcessMemory process)
     {
         IntPtr ptr = IntPtr.Zero;
-        MemoryScanPattern target = new MemoryScanPattern(10, "66 81 E1 FF 1F 0F B7 C9 8A 89 ?? ?? ?? ?? C3") { OnFound = process.ReadPointer };
+        ScanPattern target = new ScanPattern(10, "66 81 E1 FF 1F 0F B7 C9 8A 89 ?? ?? ?? ?? C3") { OnFound = process.ReadPointer };
 
         ptr = process.MemoryPages.Where(p => p.RegionSize == 0x101000)
             .Select(p => process.Scan(target, p.BaseAddress, (int)p.RegionSize))

@@ -21,9 +21,9 @@ internal class Mednafen : GBAEmulator
         bool is64bit = process.Is64Bit;
 
         ewram_pointer = is64bit
-            ? process.Scan(new MemoryScanPattern(3, "48 8B 05 ?? ?? ?? ?? 81 E1 FF FF 03 00")
+            ? process.Scan(new ScanPattern(3, "48 8B 05 ?? ?? ?? ?? 81 E1 FF FF 03 00")
             { OnFound = (addr) => { var ptr = addr + 0x4 + process.Read<int>(addr); if (process.Read<byte>(addr + 10) == 0x48) ptr = process.ReadPointer(ptr); return ptr; } }, mainModule)
-            : process.Scan(new MemoryScanPattern(1, "A1 ?? ?? ?? ?? 81 ?? FF FF 03 00") { OnFound = addr => process.ReadPointer(addr) }, mainModule);
+            : process.Scan(new ScanPattern(1, "A1 ?? ?? ?? ?? 81 ?? FF FF 03 00") { OnFound = addr => process.ReadPointer(addr) }, mainModule);
         if (ewram_pointer == IntPtr.Zero)
             return false;
         if (!process.ReadPointer(ewram_pointer, out IntPtr ewram))
@@ -31,9 +31,9 @@ internal class Mednafen : GBAEmulator
 
 
         iwram_pointer = is64bit
-            ? process.Scan(new MemoryScanPattern(3, "48 8B 05 ?? ?? ?? ?? 81 E1 FF 7F 00 00")
+            ? process.Scan(new ScanPattern(3, "48 8B 05 ?? ?? ?? ?? 81 E1 FF 7F 00 00")
             { OnFound = addr => { var ptr = addr + 0x4 + process.Read<int>(addr); if (process.Read<byte>(addr + 10) == 0x48) ptr = process.ReadPointer(ptr); return ptr; } })
-            : process.Scan(new MemoryScanPattern(1, "A1 ?? ?? ?? ?? 81 ?? FF 7F 00 00") { OnFound = addr => process.ReadPointer(addr) });
+            : process.Scan(new ScanPattern(1, "A1 ?? ?? ?? ?? 81 ?? FF 7F 00 00") { OnFound = addr => process.ReadPointer(addr) });
         if (iwram_pointer == IntPtr.Zero)
             return false;
         if (!process.ReadPointer(iwram_pointer, out IntPtr iwram))

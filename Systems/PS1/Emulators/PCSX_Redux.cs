@@ -20,20 +20,25 @@ internal class PCSXRedux : PS1Emulator
         if (!_process.Is64Bit)
             return false;
 
-        baseAddress = _process.Scan(new MemoryScanPattern(3, "48 8B 0D ?? ?? ?? ?? ?? ?? ?? FF FF FF 00") { OnFound = addr => addr + 0x4 + _process.Read<int>(addr) });
-        // baseAddress = _process.Scan(new MemoryScanPattern(3, "48 8B 05 ?? ?? ?? ?? 45 85 C0") { OnFound = addr => addr + 0x4 + _process.Read<int>(addr) });
-        if (baseAddress == IntPtr.Zero)
+        IntPtr addr = _process.Scan(new ScanPattern(3, "48 8B 05 ?? ?? ?? ?? 48 8B 80 ?? ?? ?? ?? 48 8B 50 ?? E8"));
+        if (addr == IntPtr.Zero)
             return false;
 
-        var pAddr = _process.Scan(new MemoryScanPattern(0, "4C 8B 99 ?? ?? ?? ?? 4D 8B 7B"));
-        if (pAddr == IntPtr.Zero)
+        if (!_process.Read(addr, out int addri))
             return false;
 
-        offsets = [ _process.Read<int>(pAddr + 3), _process.Read<byte>(pAddr + 10), 0 ];
+        baseAddress = addr + 0x4 + addri;
+
+        if (!_process.Read(addr + 7, out int offset1) || !_process.Read(addr + 14, out byte offset2))
+            return false;
+        offsets = [ offset1, offset2, 0 ];
+
         RamBase = _process.DerefOffsets(baseAddress, offsets);
 
         if (RamBase != IntPtr.Zero)
             Log.Info($"  => RAM address found at 0x{RamBase.ToString("X")}");
+        else
+            Log.Info($"  => RAM address unavailable at this moment, but it will be evaluated dynamically");
 
         return true;
     }

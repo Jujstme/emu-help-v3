@@ -60,7 +60,6 @@ public class PS1 : HelperBase
         if (baseRam == IntPtr.Zero)
             return false;
 
-
         if (address >= MINSIZE && address < MAXSIZE)
         {
             realAddress = (IntPtr)((ulong)baseRam + address - MINSIZE);

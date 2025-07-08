@@ -14,7 +14,7 @@ internal class Retroarch : PS2Emulator
         };
 
     internal Retroarch()
-    : base()
+        : base()
     {
         Log.Info("  => Attached to emulator: Retroarch");
     }
@@ -30,7 +30,10 @@ internal class Retroarch : PS2Emulator
 
         core_base_address = currentCore.BaseAddress;
 
-        IntPtr ptr = _process.Scan(new MemoryScanPattern(3, "48 8B ?? ?? ?? ?? ?? 81 ?? F0 3F 00 00") { OnFound = addr => addr + 0x4 + _process.Read<int>(addr) }, currentCore);
+        if (!currentCore.Symbols.TryGetValue("retro_get_memory_data", out IntPtr baseScanAddr))
+            return false;
+
+        IntPtr ptr = _process.Scan(new ScanPattern(3, "?? ?? ?? ?? C3") { OnFound = addr => _process.DerefOffsets(addr + 0x4 + _process.Read<int>(addr), 0, 0) }, baseScanAddr, 0x100);
         if (ptr == IntPtr.Zero)
             return false;
 

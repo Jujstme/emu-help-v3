@@ -21,31 +21,31 @@ internal class VisualBoyAdvance : GBAEmulator
 
         if (process.Is64Bit)
         {
-            ewram_pointer = process.Scan(new MemoryScanPattern(3, "48 8B 05 ?? ?? ?? ?? 81 E3 FF FF 03 00")
+            ewram_pointer = process.Scan(new ScanPattern(3, "48 8B 05 ?? ?? ?? ?? 81 E3 FF FF 03 00")
             { OnFound = addr => { IntPtr ptr = addr + 0x4 + process.Read<int>(addr); if (process.Read<byte>(addr + 10) == 0x48) ptr = process.ReadPointer(ptr); return ptr; } });
             if (ewram_pointer == IntPtr.Zero)
                 return false;
 
-            iwram_pointer = process.Scan(new MemoryScanPattern(3, "48 8B 05 ?? ?? ?? ?? 81 E3 FF 7F 00 00")
+            iwram_pointer = process.Scan(new ScanPattern(3, "48 8B 05 ?? ?? ?? ?? 81 E3 FF 7F 00 00")
             { OnFound = addr => { var ptr = addr + 0x4 + process.Read<int>(addr); if (process.Read<byte>(addr + 10) == 0x48) ptr = process.ReadPointer(ptr); return ptr; } });
             if (iwram_pointer == IntPtr.Zero)
                 return false;
         }
         else
         {
-            ewram_pointer = process.Scan(new MemoryScanPattern(1, "A1 ?? ?? ?? ?? 81 ?? FF FF 03 00") { OnFound = addr => process.ReadPointer(addr) });
+            ewram_pointer = process.Scan(new ScanPattern(1, "A1 ?? ?? ?? ?? 81 ?? FF FF 03 00") { OnFound = addr => process.ReadPointer(addr) });
             if (ewram_pointer == IntPtr.Zero)
                 return false;
 
             if (ewram_pointer != IntPtr.Zero)
             {
-                iwram_pointer = process.Scan(new MemoryScanPattern(1, "A1 ?? ?? ?? ?? 81 ?? FF 7F 00 00") { OnFound = process.ReadPointer });
+                iwram_pointer = process.Scan(new ScanPattern(1, "A1 ?? ?? ?? ?? 81 ?? FF 7F 00 00") { OnFound = process.ReadPointer });
                 if (iwram_pointer == IntPtr.Zero)
                     return false;
             }
             else
             {
-                ewram_pointer = process.Scan(new MemoryScanPattern(8, "81 E6 FF FF 03 00 8B 15") { OnFound = process.ReadPointer });
+                ewram_pointer = process.Scan(new ScanPattern(8, "81 E6 FF FF 03 00 8B 15") { OnFound = process.ReadPointer });
                 if (ewram_pointer == IntPtr.Zero)
                     return false;
                 iwram_pointer = ewram_pointer + 0x4;

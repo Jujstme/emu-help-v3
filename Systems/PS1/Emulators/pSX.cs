@@ -17,9 +17,9 @@ internal class pSX : PS1Emulator
 
     public override bool FindRAM(ProcessMemory _process)
     {
-        MemoryScanPattern.OnFoundCallback callback = _process.ReadPointer;
+        ScanPattern.OnFoundCallback callback = _process.ReadPointer;
 
-        MemoryScanPattern[] patterns =
+        ScanPattern[] patterns =
         [
             new(2, "8B 15 ?? ?? ?? ?? 8D 34 1A") { OnFound = callback },
             new(1, "A1 ?? ?? ?? ?? 8D 34 18") { OnFound = callback },

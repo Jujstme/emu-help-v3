@@ -16,7 +16,7 @@ internal class ePSXe : PS1Emulator
 
     public override bool FindRAM(ProcessMemory process)
     {
-        IntPtr ptr = process.MainModule.Scan(new MemoryScanPattern(5, "C1 E1 10 8D 89") { OnFound = process.ReadPointer });
+        IntPtr ptr = process.MainModule.Scan(new ScanPattern(5, "C1 E1 10 8D 89") { OnFound = process.ReadPointer });
         
         if (ptr == IntPtr.Zero)
             return false;

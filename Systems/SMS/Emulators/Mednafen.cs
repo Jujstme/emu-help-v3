@@ -15,8 +15,8 @@ internal class Mednafen : SMSEmulator
     public override bool FindRAM(ProcessMemory _process)
     {
         RamBase = _process.Scan(_process.Is64Bit
-            ? new MemoryScanPattern(7, "25 FF 1F 00 00 88 90") { OnFound = addr => (IntPtr)_process.Read<int>(addr) }
-            : new MemoryScanPattern(8, "25 FF 1F 00 00 0F B6 80") { OnFound = _process.ReadPointer });
+            ? new ScanPattern(7, "25 FF 1F 00 00 88 90") { OnFound = addr => (IntPtr)_process.Read<int>(addr) }
+            : new ScanPattern(8, "25 FF 1F 00 00 0F B6 80") { OnFound = _process.ReadPointer });
 
         if (RamBase == IntPtr.Zero)
             return false;

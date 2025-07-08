@@ -17,7 +17,7 @@ internal class BlastEm : GenesisEmulator
 
     public override bool FindRAM(ProcessMemory _process)
     {
-        MemoryScanPattern target = new MemoryScanPattern(11, "72 0E 81 E1 FF FF 00 00 66 8B 89 ?? ?? ?? ?? C3") { OnFound = _process.ReadPointer };
+        ScanPattern target = new ScanPattern(11, "72 0E 81 E1 FF FF 00 00 66 8B 89 ?? ?? ?? ?? C3") { OnFound = _process.ReadPointer };
 
         IntPtr ptr = _process.MemoryPages.Where(p => p.RegionSize == 0x101000 && (p.Protect & MemoryProtection.PAGE_EXECUTE_READWRITE) != 0)
             .Select(page => _process.Scan(target, page.BaseAddress, (int)page.RegionSize))

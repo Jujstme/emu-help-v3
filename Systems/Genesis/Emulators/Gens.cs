@@ -15,7 +15,7 @@ internal class Gens : GenesisEmulator
 
     public override bool FindRAM(ProcessMemory _process)
     {
-        IntPtr ptr = _process.Scan(new MemoryScanPattern(11, "72 ?? 81 ?? FF FF 00 00 66 8B"));
+        IntPtr ptr = _process.Scan(new ScanPattern(11, "72 ?? 81 ?? FF FF 00 00 66 8B"));
         if (ptr == IntPtr.Zero)
             return false;
 

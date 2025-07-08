@@ -16,8 +16,8 @@ internal class Mednafen : PS1Emulator
     {
 
         IntPtr ptr = _process.Scan(_process.Is64Bit
-            ? new MemoryScanPattern(5, "89 01 0F B6 82") { OnFound = addr => (IntPtr)_process.Read<int>(addr) }
-            : new MemoryScanPattern(5, "89 01 0F B6 82 ?? ?? ?? ?? C3") { OnFound = _process.ReadPointer });
+            ? new ScanPattern(5, "89 01 0F B6 82") { OnFound = addr => (IntPtr)_process.Read<int>(addr) }
+            : new ScanPattern(5, "89 01 0F B6 82 ?? ?? ?? ?? C3") { OnFound = _process.ReadPointer });
 
         if (ptr == IntPtr.Zero)
             return false;

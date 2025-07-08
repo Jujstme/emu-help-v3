@@ -125,10 +125,9 @@ public abstract partial class HelperBase : IDisposable
             // If the emulator has not found the RAM, attempt to find it
             if (!emulatorClass.FoundRam)
             {
-                bool success = emulatorClass.FindRAM(emulatorProcess);
-                emulatorClass.FoundRam = success;
-
-                if (!success)
+                if (emulatorClass.FindRAM(emulatorProcess))
+                    emulatorClass.FoundRam = true; // Update FoundRam status if RAM is found
+                else
                     return false; // Return false if RAM was not found
             }
 

@@ -21,7 +21,7 @@ internal class NoCashGBA : GBAEmulator
     {
         var mainModule = process.MainModule;
 
-        baseAddress = process.Scan(new MemoryScanPattern(2, "FF 35 ?? ?? ?? ?? 55") { OnFound = addr => process.ReadPointer(addr) });
+        baseAddress = process.Scan(new ScanPattern(2, "FF 35 ?? ?? ?? ?? 55") { OnFound = addr => process.ReadPointer(addr) });
         if (baseAddress == IntPtr.Zero)
             return false;
 

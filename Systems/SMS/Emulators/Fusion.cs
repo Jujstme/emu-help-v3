@@ -14,7 +14,7 @@ internal class Fusion : SMSEmulator
 
     public override bool FindRAM(ProcessMemory _process)
     {
-        RamBase = _process.Scan(new MemoryScanPattern(4, "74 C8 83 3D") { OnFound = addr => _process.DerefOffsets(addr, 0, 0xC000) });
+        RamBase = _process.Scan(new ScanPattern(4, "74 C8 83 3D") { OnFound = addr => _process.DerefOffsets(addr, 0, 0xC000) });
         if (RamBase == IntPtr.Zero)
             return false;
 

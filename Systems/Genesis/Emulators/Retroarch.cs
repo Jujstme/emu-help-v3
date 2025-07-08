@@ -35,7 +35,7 @@ internal class Retroarch : GenesisEmulator
 
         if (core.ModuleName == "blastem_libretro.dll")
         {
-            MemoryScanPattern target = new MemoryScanPattern(11, "72 0E 81 E1 FF FF 00 00 66 8B 89 ?? ?? ?? ?? C3") { OnFound = addr => (IntPtr)_process.Read<int>(addr) };
+            ScanPattern target = new ScanPattern(11, "72 0E 81 E1 FF FF 00 00 66 8B 89 ?? ?? ?? ?? C3") { OnFound = addr => (IntPtr)_process.Read<int>(addr) };
 
             IntPtr ptr = _process.MemoryPages.Where(p => p.RegionSize == 0x101000 && (p.Protect & MemoryProtection.PAGE_EXECUTE_READWRITE) != 0)
                 .Select(page => _process.Scan(target, page.BaseAddress, (int)page.RegionSize))
@@ -54,14 +54,14 @@ internal class Retroarch : GenesisEmulator
             IntPtr ptr = _process.Is64Bit
                 ? core.ModuleName switch
                 {
-                    "genesis_plus_gx_libretro.dll" or "genesis_plus_gx_wide_libretro.dll" => _process.Scan(new MemoryScanPattern(1, "05 ?? ?? ?? ?? C3") { OnFound = addr => _process.DerefOffsets(addr + 0x4 + _process.Read<int>(addr), 0x0) }, baseScanAddr, 0x100),
-                    "picodrive_libretro.dll" => _process.Scan(new MemoryScanPattern(3, "48 8D 05") { OnFound = addr => addr + 0x4 + _process.Read<int>(addr) }, baseScanAddr, 0x100),
+                    "genesis_plus_gx_libretro.dll" or "genesis_plus_gx_wide_libretro.dll" => _process.Scan(new ScanPattern(1, "05 ?? ?? ?? ?? C3") { OnFound = addr => _process.DerefOffsets(addr + 0x4 + _process.Read<int>(addr), 0x0) }, baseScanAddr, 0x100),
+                    "picodrive_libretro.dll" => _process.Scan(new ScanPattern(3, "48 8D 05") { OnFound = addr => addr + 0x4 + _process.Read<int>(addr) }, baseScanAddr, 0x100),
                     _ => IntPtr.Zero,
                 }
                 : core.ModuleName switch
                 {
-                    "genesis_plus_gx_libretro.dll" or "genesis_plus_gx_wide_libretro.dll" => _process.Scan(new MemoryScanPattern(1, "B8 ?? ?? ?? ?? BA") { OnFound = _process.ReadPointer }, baseScanAddr, 0x100),
-                    "picodrive_libretro.dll" => _process.Scan(new MemoryScanPattern(1, "BA ?? ?? ?? ?? B8") { OnFound = _process.ReadPointer }, baseScanAddr, 0x100),
+                    "genesis_plus_gx_libretro.dll" or "genesis_plus_gx_wide_libretro.dll" => _process.Scan(new ScanPattern(1, "B8 ?? ?? ?? ?? BA") { OnFound = _process.ReadPointer }, baseScanAddr, 0x100),
+                    "picodrive_libretro.dll" => _process.Scan(new ScanPattern(1, "BA ?? ?? ?? ?? B8") { OnFound = _process.ReadPointer }, baseScanAddr, 0x100),
                     _ => IntPtr.Zero,
                 };
 
