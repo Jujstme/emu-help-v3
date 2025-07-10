@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using EmuHelp.Logging;
 using JHelper.Common.ProcessInterop;
 
@@ -6,13 +7,6 @@ namespace EmuHelp.Systems.PSP.Emulators;
 
 internal class Ppsspp : PSPEmulator
 {
-    [System.Runtime.InteropServices.DllImport("user32.dll")]    
-    public static extern IntPtr FindWindow(string? lpClassName, string? lpWindowName);
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
-    public static extern int SendMessage(IntPtr hWnd, int wMsg, int wParam, int lParam);
-
-    private static readonly string ClassName = "PPSSPPWnd";
-
     private IntPtr addr_base;
 
     internal Ppsspp()
@@ -21,44 +15,46 @@ internal class Ppsspp : PSPEmulator
         Log.Info("  => Attached to emulator: PPSSPP");
     }
 
-    public override bool FindRAM(ProcessMemory _process)
+    public override bool FindRAM(ProcessMemory process)
     {
-        IntPtr hwnd = FindWindow(ClassName, null);
-        if (hwnd != IntPtr.Zero)
-        {
-            // https://www.ppsspp.org/docs/reference/process-hacks/
-            int lower = SendMessage(hwnd, 0xB118, 0, 2);
-            if (_process.Is64Bit)
-            {
-                int upper = SendMessage(hwnd, 0xB118, 0, 3);
-                addr_base = (IntPtr)((upper << 32) + lower);
-            }
-            else
-            {
-                addr_base = (IntPtr)lower;
-            }
+        // Possible signatures usable as alternative to FindWindow
+        // 64-bit: 48 8B 05 ?? ?? ?? ?? 44 8B 34 01
+        // 32-bit: A1 ?? ?? ?? ?? 8B 04 06
 
-            if (addr_base == IntPtr.Zero)
-                return false;
+        IntPtr hwnd = FindWindow("PPSSPPWnd", null);
+        if (hwnd == IntPtr.Zero)
+            return false;
 
-            if (!_process.Read(addr_base, out IntPtr ptr))
-                return false;
+        // https://www.ppsspp.org/docs/reference/process-hacks/
+        nint address = (nint)SendMessage(hwnd, 0xB118, 0, 2);
 
-            RamBase = ptr;
-        }
+        if (process.Is64Bit)
+            address += (nint)SendMessage(hwnd, 0xB118, 0, 3) << 32;
 
-        if (RamBase != IntPtr.Zero)
+        if (address == 0)
+            return false;
+
+        addr_base = address;
+
+        RamBase = process.ReadPointer(addr_base);
+
+        if (RamBase == IntPtr.Zero)
+            Log.Info($"  => RAM address unavailable at this moment, but it will be evaluated dynamically");
+        else
             Log.Info($"  => RAM address found at 0x{RamBase.ToString("X")}");
-
+        
         return true;
+
+        [DllImport("user32.dll")]
+        static extern IntPtr FindWindow(string lpClassName, string? lpWindowName);
+
+        [DllImport("user32.dll")]
+        static extern uint SendMessage(nint hWnd, int wMsg, nint wParam, nint lParam);
     }
 
     public override bool KeepAlive(ProcessMemory process)
     {
-        if (!process.Read(addr_base, out IntPtr ptr))
-            return false;
-
-        RamBase = ptr;
+        RamBase = process.ReadPointer(addr_base);
         return true;
     }
 }

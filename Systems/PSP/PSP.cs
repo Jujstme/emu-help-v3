@@ -14,8 +14,13 @@ public class PlayStationPortable : PSP { }
 
 public class PSP : HelperBase
 {
-    private const uint MINSIZE = 0x08000000; // kernel memory base
-    private const uint MAXSIZE = 0x40000000;
+    // Notes about PSP memory mapping:
+    // Mapping starts at 0x08000000, although the first 8MB is reserved for the kernel.
+    // User memory starts at 0x08800000, and goes up to 0x09FFFFFF for a total of 24MB.
+    // More documentation is available at https://github.com/hrydgard/ppsspp/blob/20e88679a0d21175f91cda238d3fd5918506950a/Core/MemMap.h
+
+    private const uint MINSIZE = 0x08800000;
+    private const uint MAXSIZE = 0x0A000000;
 
     private PSPEmulator? Pspemulator
     {
@@ -40,7 +45,6 @@ public class PSP : HelperBase
     [
         "PPSSPPWindows64.exe",
         "PPSSPPWindows.exe",
-        // "retroarch.exe",
     ];
 
     public override bool TryGetRealAddress(ulong address, out IntPtr realAddress)
@@ -54,7 +58,6 @@ public class PSP : HelperBase
 
         if (baseRam == IntPtr.Zero)
             return false;
-
 
         if (address >= MINSIZE && address < MAXSIZE)
         {
@@ -72,7 +75,6 @@ public class PSP : HelperBase
         return emulatorProcess.ProcessName switch
         {
             "PPSSPPWindows64.exe" or "PPSSPPWindows.exe" => new Ppsspp(),
-            // "retroarch.exe" => new Retroarch(),
             _ => null,
         };
     }
