@@ -6,14 +6,16 @@ Its primary intended use case is in conjunction with a .asl script for LiveSplit
 ## Supported systems and emulators
 
 Support is currently provided for the following systems:
-- Sega Master System
-- Sega Megadrive / Sega Genesis
-- Playstation 1
-- Playstation 2
-- Nintendo GameBoy Advance
-- Nintendo Gamecube
-- Nintendo Wii
 - Microsoft Xbox 360
+- Nintendo Game Boy Advance
+- Nintendo Game Boy Color
+- Nintendo GameCube
+- Nintendo Wii
+- Sega Master System
+- Sega Mega Drive / Sega Genesis
+- Sony PlayStation 1
+- Sony PlayStation 2
+- Sony PlayStation Portable
 
 Each system has separate support for various emulators. For example, Sega Genesis games are supported on Retroarch, Gens, BlastEm, Fusion / Kega Fusion and the official Steam release of SEGA Genesis Classics. Or, just to make another example, Playstation 1 games are supported on Retroarch, ePSXe, PCSX_Redux, Xebra, pSX and Duckstation.
 
