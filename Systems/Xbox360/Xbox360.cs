@@ -1,11 +1,9 @@
 ﻿using EmuHelp.HelperBase;
 using EmuHelp.Logging;
-using EmuHelp.Systems.Wii;
 using EmuHelp.Systems.Xbox360;
 using EmuHelp.Systems.Xbox360.Emulators;
 using JHelper.Common.MemoryUtils;
 using System;
-using System.Runtime.InteropServices;
 
 public class X360 : Xbox360 { }
 
@@ -75,9 +73,11 @@ public class Xbox360 : HelperBase
             return false;
         }
 
-        return Xbox360emulator.Endianness == Endianness.Big
-            ? emulatorProcess.ReadBigEndian(realAddress, out value)
-            : emulatorProcess.Read(realAddress, out value);
+        if (!emulatorProcess.Read(realAddress, out value))
+            return false;
+
+        value = value.FromEndian(Xbox360emulator.Endianness);
+        return true;
     }
 
     protected override bool ResolvePath(out IntPtr finalAddress, ulong baseAddress, params int[] offsets)
@@ -91,12 +91,8 @@ public class Xbox360 : HelperBase
 
         foreach (int offset in offsets)
         {
-            uint tempAddress;
-
-            if (!(Xbox360emulator.Endianness == Endianness.Big
-                ? emulatorProcess.ReadBigEndian(finalAddress, out tempAddress)
-                : emulatorProcess.Read(finalAddress, out tempAddress))
-                || !TryGetRealAddress((ulong)(tempAddress + offset), out finalAddress))
+            if (!emulatorProcess.Read(finalAddress, out uint tempAddress)
+                || !TryGetRealAddress((ulong)(tempAddress.FromEndian(Xbox360emulator.Endianness) + offset), out finalAddress))
                 return false;
         }
 
@@ -113,14 +109,13 @@ public class Xbox360 : HelperBase
 
         using (ArrayRental<T> buffer = (int)size * sizeof(T) <= 1024 ? new(stackalloc T[(int)size]) : new((int)size))
         {
-            if (!(Xbox360emulator.Endianness == Endianness.Big
-                ? emulatorProcess.ReadArrayBigEndian(realAddress, buffer.Span)
-                : emulatorProcess.ReadArray(realAddress, buffer.Span)))
+            if (!emulatorProcess.ReadArray(realAddress, buffer.Span))
             {
                 value = new T[(int)size];
                 return false;
             }
 
+            Endian.FromEndian(buffer.Span, Xbox360emulator.Endianness);
             value = buffer.Span.ToArray();
         }
 

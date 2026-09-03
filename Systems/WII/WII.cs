@@ -1,11 +1,9 @@
 ﻿using EmuHelp.HelperBase;
 using EmuHelp.Logging;
-using EmuHelp.Systems.GCN;
 using EmuHelp.Systems.Wii;
 using EmuHelp.Systems.Wii.Emulators;
 using JHelper.Common.MemoryUtils;
 using System;
-using System.Runtime.InteropServices;
 
 public class Wii : WII { }
 
@@ -87,9 +85,11 @@ public class WII : HelperBase
             return false;
         }
 
-        return Wiiemulator.Endianness == Endianness.Big
-            ? emulatorProcess.ReadBigEndian(realAddress, out value)
-            : emulatorProcess.Read(realAddress, out value);
+        if (!emulatorProcess.Read(realAddress, out value))
+            return false;
+
+        value = value.FromEndian(Wiiemulator.Endianness);
+        return true;
     }
 
     protected override bool ResolvePath(out IntPtr finalAddress, ulong baseAddress, params int[] offsets)
@@ -103,12 +103,8 @@ public class WII : HelperBase
 
         foreach (int offset in offsets)
         {
-            uint tempAddress;
-
-            if (!(Wiiemulator.Endianness == Endianness.Big
-                ? emulatorProcess.ReadBigEndian(finalAddress, out tempAddress)
-                : emulatorProcess.Read(finalAddress, out tempAddress))
-                || !TryGetRealAddress((ulong)(tempAddress + offset), out finalAddress))
+            if (!emulatorProcess.Read(finalAddress, out uint tempAddress)
+                || !TryGetRealAddress((ulong)(tempAddress.FromEndian(Wiiemulator.Endianness) + offset), out finalAddress))
                 return false;
         }
 
@@ -125,14 +121,13 @@ public class WII : HelperBase
 
         using (ArrayRental<T> buffer = (int)size * sizeof(T) <= 1024 ? new(stackalloc T[(int)size]) : new((int)size))
         {
-            if (!(Wiiemulator.Endianness == Endianness.Big
-                ? emulatorProcess.ReadArrayBigEndian(realAddress, buffer.Span)
-                : emulatorProcess.ReadArray(realAddress, buffer.Span)))
+            if (!emulatorProcess.ReadArray(realAddress, buffer.Span))
             {
                 value = new T[(int)size];
                 return false;
             }
-
+            
+            Endian.FromEndian(buffer.Span, Wiiemulator.Endianness);
             value = buffer.Span.ToArray();
         }
 

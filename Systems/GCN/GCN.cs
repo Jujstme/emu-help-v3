@@ -81,9 +81,11 @@ public class GCN : HelperBase
             return false;
         }
 
-        return Gcnemulator.Endianness == Endianness.Big
-            ? emulatorProcess.ReadBigEndian(realAddress, out value)
-            : emulatorProcess.Read(realAddress, out value);
+        if (!emulatorProcess.Read(realAddress, out value))
+            return false;
+
+        value = value.FromEndian(Gcnemulator.Endianness);
+        return true;
     }
 
     protected override bool ResolvePath(out IntPtr finalAddress, ulong baseAddress, params int[] offsets)
@@ -97,12 +99,8 @@ public class GCN : HelperBase
 
         foreach (int offset in offsets)
         {
-            uint tempAddress;
-
-            if (!(Gcnemulator.Endianness == Endianness.Big
-                ? emulatorProcess.ReadBigEndian(finalAddress, out tempAddress)
-                : emulatorProcess.Read(finalAddress, out tempAddress))
-                || !TryGetRealAddress((ulong)(tempAddress + offset), out finalAddress))
+            if (!emulatorProcess.Read(finalAddress, out uint tempAddress)
+                || !TryGetRealAddress((ulong)(tempAddress.FromEndian(Gcnemulator.Endianness) + offset), out finalAddress))
                 return false;
         }
 
@@ -119,14 +117,13 @@ public class GCN : HelperBase
 
         using (ArrayRental<T> buffer = (int)size * sizeof(T) <= 1024 ? new(stackalloc T[(int)size]) : new((int)size))
         {
-            if (!(Gcnemulator.Endianness == Endianness.Big
-                ? emulatorProcess.ReadArrayBigEndian(realAddress, buffer.Span)
-                : emulatorProcess.ReadArray(realAddress, buffer.Span)))
+            if (!emulatorProcess.ReadArray(realAddress, buffer.Span))
             {
                 value = new T[(int)size];
                 return false;
             }
 
+            Endian.FromEndian(buffer.Span, Gcnemulator.Endianness);
             value = buffer.Span.ToArray();
         }
 
