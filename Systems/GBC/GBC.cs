@@ -1,8 +1,8 @@
 ﻿using EmuHelp.HelperBase;
+using EmuHelp.Logging;
 using EmuHelp.Systems.GBC;
 using EmuHelp.Systems.GBC.Emulators;
 using System;
-using EmuHelp.Logging;
 
 public class GameBoyColor : GBC { }
 
@@ -12,10 +12,16 @@ public class GameboyColor : GBC { }
 
 public class GBC : HelperBase
 {
-    private const uint WRAM_MINSIZE = 0xC000;
-    private const uint WRAM_MAXSIZE = 0xE000;
-    private const uint IOHRAM_MINSIZE = 0xFF00;
-    private const uint IOHRAM_MAXSIXE = 0x10000;
+    // GameBoy Color memory layout is descibed here: https://gbdev.io/pandocs/Memory_Map.html
+    // We are mostly interested in these:
+    // A000 - BFFF  8 KiB External RAM From cartridge (SRAM)
+    // C000 - DFFF  8 KiB Work RAM (WRAM)
+    // FF00 - FF7F  I/O Registers
+    // FF80 - FFFE  High RAM(HRAM)
+
+    private const uint SRAM_MIN = 0xA000, SRAM_MAX = 0xBFFF;
+    private const uint WRAM_MIN = 0xC000, WRAM_MAX = 0xDFFF;
+    private const uint IOHRAM_MIN = 0xFF00, IOHRAM_MAX = 0x10000;
 
     private GBCEmulator? emulator
     {
@@ -48,16 +54,22 @@ public class GBC : HelperBase
         realAddress = default;
 
         if (emulator is null)
-            return false;
-
-        if (address >= WRAM_MINSIZE && address < WRAM_MAXSIZE)
         {
-            realAddress = (IntPtr)((ulong)emulator.WRAM + address - WRAM_MINSIZE);
+            return false;
+        }
+        else if (address >= SRAM_MIN && address <= SRAM_MAX)
+        {
+            realAddress = (IntPtr)((ulong)emulator.SRAM + address - SRAM_MIN);
             return true;
         }
-        else if (address >= IOHRAM_MINSIZE && address < IOHRAM_MAXSIXE)
+        else if (address >= WRAM_MIN && address <= WRAM_MAX)
         {
-            realAddress = (IntPtr)((ulong)emulator.IOHRAM + address - IOHRAM_MINSIZE);
+            realAddress = (IntPtr)((ulong)emulator.WRAM + address - WRAM_MIN);
+            return true;
+        }
+        else if (address >= IOHRAM_MIN && address <= IOHRAM_MAX)
+        {
+            realAddress = (IntPtr)((ulong)emulator.IOHRAM + address - IOHRAM_MIN);
             return true;
         }
         else
