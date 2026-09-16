@@ -88,7 +88,7 @@ public class WII : HelperBase
         if (!emulatorProcess.Read(realAddress, out value))
             return false;
 
-        value = value.FromEndian(Wiiemulator.Endianness);
+        Endian.FromEndian(ref value, Wiiemulator.Endianness);
         return true;
     }
 

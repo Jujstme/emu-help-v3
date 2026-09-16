@@ -84,7 +84,7 @@ public class GCN : HelperBase
         if (!emulatorProcess.Read(realAddress, out value))
             return false;
 
-        value = value.FromEndian(Gcnemulator.Endianness);
+        Endian.FromEndian(ref value, Gcnemulator.Endianness);
         return true;
     }
 

@@ -76,7 +76,7 @@ public class Xbox360 : HelperBase
         if (!emulatorProcess.Read(realAddress, out value))
             return false;
 
-        value = value.FromEndian(Xbox360emulator.Endianness);
+        Endian.FromEndian(ref value, Xbox360emulator.Endianness);
         return true;
     }
 
